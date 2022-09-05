@@ -1,40 +1,78 @@
-import React, { useEffect, useState } from 'react';
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useState,
+  useCallback,
+} from 'react';
 
 import axios from 'axios';
+import ReactImageMagnify from 'react-image-magnify';
 
-const imgs = ['i1', 'i2', 'i3'];
+const ids = ['i1', 'i2'];
 
 export default function Home() {
-  // const [imgSrc, setImgSrc] = useState();
+  const [imgs, setImgs] = useState([]);
 
-  useEffect(() => {
-    imgs.forEach((img) => {
-      axios
-        .get('/api/img', {
-          responseType: 'blob',
-        })
-        .then((res) => {
-          const imgUrl = URL.createObjectURL(res.data);
+  // useLayoutEffect(() => {
+  //   loadingImgs();
+  // }, []);
 
-          const imgTag = document.getElementById(img);
-          imgTag.src = imgUrl;
+  console.log(imgs);
 
-          return imgUrl;
-        })
-        .then((url) => {
-          URL.revokeObjectURL(url);
-        });
-    });
+  useLayoutEffect(() => {
+    async function load() {
+      const prev = new Array();
+
+      for (let i = 0; i < ids.length; i++) {
+        const arr = await loadingImgs(ids[i]);
+
+        prev.push(arr);
+      }
+
+      console.log(prev);
+
+      setImgs(prev);
+    }
+
+    load();
   }, []);
+
+  const loadingImgs = async (img) => {
+    return await axios
+      .get('/api/img', {
+        responseType: 'blob',
+      })
+      .then((res) => {
+        return {
+          id: img,
+          imgSrc: URL.createObjectURL(res.data),
+        };
+      });
+  };
 
   return (
     <div>
       <div>home</div>
-      {imgs.map((id) => (
-        <div key={id}>
-          <img id={id} />
-        </div>
-      ))}
+      <div
+        style={{
+          width: '500px',
+        }}
+      >
+        {imgs.map((item) => (
+          <ReactImageMagnify
+            key={item.id}
+            smallImage={{
+              src: item.imgSrc,
+              isFluidWidth: true,
+            }}
+            largeImage={{
+              src: item.imgSrc,
+              width: 1280,
+              height: 720,
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 }

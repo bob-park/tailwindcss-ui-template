@@ -35,18 +35,24 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
+function NeedLogin() {
+  const naviation = useNavigate();
+
+  useEffect(() => {
+    naviation('/login');
+  }, []);
+}
+
 function BaseLayout() {
   const localtion = useLocation();
-  const naviate = useNavigate();
+
   const dispatch = useDispatch();
 
   const { isLoggedIn, user: loginUser } = useSelector(userSelector.all);
 
   useEffect(() => {
-    !isLoggedIn && naviate('/login');
-
     console.log(loginUser);
-  }, [isLoggedIn]);
+  }, [loginUser]);
 
   const handleMenuItemClick = (e, href) => {
     e.preventDefault();
@@ -63,7 +69,7 @@ function BaseLayout() {
   ];
 
   return (
-    <>
+    <div>
       <div className="min-h-full">
         <Disclosure as="nav" className="bg-gray-800">
           {({ open }) => (
@@ -212,14 +218,18 @@ function BaseLayout() {
         </Disclosure>
 
         <div className="pt-6 container">
-          <Routes>
-            {routes.map((route) => (
-              <Route {...route} key={route.name} />
-            ))}
-          </Routes>
+          {isLoggedIn ? (
+            <Routes>
+              {routes.map((route) => (
+                <Route {...route} key={route.name} />
+              ))}
+            </Routes>
+          ) : (
+            <NeedLogin />
+          )}
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
