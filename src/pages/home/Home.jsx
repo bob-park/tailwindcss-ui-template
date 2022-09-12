@@ -37,6 +37,15 @@ export default function Home() {
     load();
   }, []);
 
+  useEffect(() => {
+    console.log(imgs);
+
+    imgs.forEach((img) => {
+      URL.revokeObjectURL(img.imgSrc);
+      console.log(`img revoke ${img.imgSrc}`);
+    });
+  }, [imgs.length === ids.length]);
+
   const loadingImgs = async (img) => {
     return await axios
       .get('/api/img', {
